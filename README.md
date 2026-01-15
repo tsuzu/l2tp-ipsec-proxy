@@ -136,6 +136,41 @@ docker-compose exec vpn-client cat /var/log/xl2tpd.log
 - **権限エラー**: `privileged: true` と適切なケーパビリティが設定されているか確認してください
 - **IPSec接続タイムアウト**: `RIGHTID` の値を確認してください（VPNサーバーの証明書のCNやサーバー設定によって異なる場合があります）
 
+### 速度が遅い場合（数十kbps程度）
+
+パケット断片化が原因の可能性があります。以下を試してください：
+
+1. **MTU/MRUを下げる**:
+   ```bash
+   # vpn.envで以下の値を試す
+   MTU=1280
+   MRU=1280
+   ```
+
+   段階的に試す推奨値：1400 → 1350 → 1280 → 1200
+
+2. **診断コマンド**:
+   ```bash
+   # 現在のMTU確認
+   docker-compose exec vpn-client ip link show ppp0
+
+   # パケットロステスト（大きいパケット）
+   docker-compose exec vpn-client ping -c 10 -s 1400 8.8.8.8
+
+   # パケットロステスト（小さいパケット）
+   docker-compose exec vpn-client ping -c 10 -s 1200 8.8.8.8
+   ```
+
+3. **MSS clamping（自動設定済み）**:
+   connect.shで自動的にTCP MSSが調整されます。これによりTCP接続での断片化が防止されます。
+
+4. **xl2tpdログの確認**:
+   ```bash
+   docker-compose exec vpn-client cat /var/log/xl2tpd.log | tail -50
+   ```
+
+   `recv packet from ... size = 64` のような小さいパケットサイズが頻出する場合、MTUを下げてください。
+
 ## セキュリティ上の注意
 
 - `vpn.env` ファイルには機密情報が含まれるため、適切に管理してください

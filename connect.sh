@@ -211,6 +211,13 @@ fi
 echo "Current routing table after bypass routes:"
 ip route
 
+# Enable MSS clamping for TCP connections over ppp0
+# This prevents packet fragmentation issues with IPSec
+echo "Configuring MSS clamping for ppp0..."
+iptables -t mangle -A FORWARD -o ppp0 -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+iptables -t mangle -A OUTPUT -o ppp0 -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+echo "MSS clamping configured"
+
 # Start gost proxy server
 echo "Starting gost proxy server..."
 echo "  HTTP proxy: 0.0.0.0:$GOST_HTTP_PORT"

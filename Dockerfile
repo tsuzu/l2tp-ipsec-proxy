@@ -1,18 +1,21 @@
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 ARG TARGETOS
 ARG TARGETARCH
 ARG GOST_VERSION=3.2.6
 
 # Install required packages
-RUN apk add --no-cache \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     strongswan \
     xl2tpd \
     ppp \
-    openrc \
     bash \
     iproute2 \
-    wget
+    wget \
+    ca-certificates \
+    iptables && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install go-gost with multi-architecture support
 RUN ARCH=${TARGETARCH} && \
