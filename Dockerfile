@@ -1,5 +1,9 @@
 FROM alpine:latest
 
+ARG TARGETOS
+ARG TARGETARCH
+ARG GOST_VERSION=3.2.6
+
 # Install required packages
 RUN apk add --no-cache \
     strongswan \
@@ -7,7 +11,19 @@ RUN apk add --no-cache \
     ppp \
     openrc \
     bash \
-    iproute2
+    iproute2 \
+    wget
+
+# Install go-gost with multi-architecture support
+RUN ARCH=${TARGETARCH} && \
+    if [ "$ARCH" = "amd64" ]; then ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then ARCH="arm64"; \
+    elif [ "$ARCH" = "arm" ]; then ARCH="armv7"; \
+    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    wget -O /tmp/gost.tar.gz "https://github.com/go-gost/gost/releases/download/v${GOST_VERSION}/gost_${GOST_VERSION}_${TARGETOS}_${ARCH}.tar.gz" && \
+    tar -xzf /tmp/gost.tar.gz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/gost && \
+    rm /tmp/gost.tar.gz
 
 # Create necessary directories
 RUN mkdir -p /var/run/xl2tpd

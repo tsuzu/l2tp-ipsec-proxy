@@ -39,6 +39,18 @@ if [ -z "$MRU" ]; then
     MRU=1410
 fi
 
+# Set default GOST ports if not specified
+if [ -z "$GOST_HTTP_PORT" ]; then
+    GOST_HTTP_PORT=8080
+fi
+
+if [ -z "$GOST_SOCKS_PORT" ]; then
+    GOST_SOCKS_PORT=1080
+fi
+
+# BYPASS_CIDRS is optional (comma-separated list of CIDRs)
+# Example: BYPASS_CIDRS="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+
 echo "Configuring VPN connection..."
 echo "Server: $VPN_SERVER_IP"
 echo "Right ID: $RIGHTID"
@@ -176,6 +188,48 @@ echo "Route to VPN server: $(ip route get $VPN_SERVER_IP)"
 echo "Current routing table:"
 ip route
 
+# Add bypass routes for specified CIDRs
+if [ -n "$BYPASS_CIDRS" ]; then
+    echo "Adding bypass routes for CIDRs: $BYPASS_CIDRS"
+    IFS=',' read -ra CIDR_ARRAY <<< "$BYPASS_CIDRS"
+    for CIDR in "${CIDR_ARRAY[@]}"; do
+        # Trim whitespace
+        CIDR=$(echo "$CIDR" | xargs)
+        if [ -n "$CIDR" ]; then
+            if [ -n "$DEFAULT_GW" ] && [ -n "$DEFAULT_DEV" ]; then
+                echo "  Adding route: $CIDR via $DEFAULT_GW dev $DEFAULT_DEV"
+                ip route add "$CIDR" via "$DEFAULT_GW" dev "$DEFAULT_DEV" 2>/dev/null || echo "    (route already exists or failed)"
+            elif [ -n "$DEFAULT_DEV" ]; then
+                echo "  Adding route: $CIDR dev $DEFAULT_DEV"
+                ip route add "$CIDR" dev "$DEFAULT_DEV" 2>/dev/null || echo "    (route already exists or failed)"
+            fi
+        fi
+    done
+    echo "Bypass routes added."
+fi
+
+echo "Current routing table after bypass routes:"
+ip route
+
+# Start gost proxy server
+echo "Starting gost proxy server..."
+echo "  HTTP proxy: 0.0.0.0:$GOST_HTTP_PORT"
+echo "  SOCKS5 proxy: 0.0.0.0:$GOST_SOCKS_PORT"
+
+gost -L "http://:$GOST_HTTP_PORT" -L "socks5://:$GOST_SOCKS_PORT" &
+GOST_PID=$!
+
+# Wait for gost to initialize
+sleep 2
+
+# Check if gost is running
+if ! kill -0 $GOST_PID 2>/dev/null; then
+    echo "Warning: gost failed to start, but continuing with VPN connection"
+    GOST_PID=""
+else
+    echo "gost started successfully (PID: $GOST_PID)"
+fi
+
 echo "VPN connection established successfully!"
 echo "Keeping connection alive..."
 
@@ -194,6 +248,20 @@ while true; do
     if ! ip addr show ppp0 >/dev/null 2>&1; then
         echo "Error: ppp0 interface is down"
         exit 1
+    fi
+
+    # Monitor gost if it was started successfully
+    if [ -n "$GOST_PID" ] && ! kill -0 $GOST_PID 2>/dev/null; then
+        echo "Warning: gost process died, restarting..."
+        gost -L "http://:$GOST_HTTP_PORT" -L "socks5://:$GOST_SOCKS_PORT" &
+        GOST_PID=$!
+        sleep 2
+        if ! kill -0 $GOST_PID 2>/dev/null; then
+            echo "Error: Failed to restart gost"
+            GOST_PID=""
+        else
+            echo "gost restarted successfully (PID: $GOST_PID)"
+        fi
     fi
 
     sleep 5
