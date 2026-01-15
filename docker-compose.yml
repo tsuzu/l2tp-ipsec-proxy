@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  vpn-client:
+    build: .
+    container_name: l2tp-ipsec-vpn
+    env_file:
+      - ../vpn.env
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/ppp
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /lib/modules:/lib/modules:ro

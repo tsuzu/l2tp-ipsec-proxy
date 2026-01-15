@@ -1,0 +1,15 @@
+[global]
+access control = no
+debug avp = yes
+debug network = yes
+debug state = yes
+debug tunnel = yes
+
+[lac vpn-connection]
+lns = VPN_SERVER_IP_PLACEHOLDER
+ppp debug = yes
+pppoptfile = /etc/ppp/options.l2tpd.client
+length bit = yes
+redial = yes
+redial timeout = 15
+max redials = 5

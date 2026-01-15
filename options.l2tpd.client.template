@@ -1,0 +1,18 @@
+ipcp-accept-local
+ipcp-accept-remote
+noipdefault
+refuse-eap
+require-mschap-v2
+noccp
+noauth
+logfile /var/log/xl2tpd.log
+idle 1800
+mtu MTU_PLACEHOLDER
+mru MRU_PLACEHOLDER
+defaultroute
+replacedefaultroute
+usepeerdns
+debug
+connect-delay 5000
+name USER_PLACEHOLDER
+password PASS_PLACEHOLDER
