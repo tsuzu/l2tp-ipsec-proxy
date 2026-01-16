@@ -165,6 +165,14 @@ fi
 
 echo "Route to VPN server: $(ip route get $VPN_SERVER_IP)"
 
+# Increase UDP buffer sizes to prevent "Resource temporarily unavailable" errors
+echo "Increasing UDP buffer sizes..."
+sysctl -w net.core.rmem_max=16777216
+sysctl -w net.core.wmem_max=16777216
+sysctl -w net.core.rmem_default=16777216
+sysctl -w net.core.wmem_default=16777216
+echo "UDP buffer sizes increased"
+
 echo "Starting xl2tpd..."
 xl2tpd -D -c /etc/xl2tpd/xl2tpd.conf &
 XL2TPD_PID=$!
@@ -180,9 +188,9 @@ fi
 
 echo "xl2tpd started successfully"
 
-# Connect to L2TP
-echo "Connecting to L2TP..."
-echo "c vpn-connection" > /var/run/xl2tpd/l2tp-control
+# With autodial=yes, xl2tpd automatically connects
+# No manual connection trigger needed
+echo "Waiting for xl2tpd to establish L2TP connection (autodial enabled)..."
 
 # Wait for PPP interface
 echo "Waiting for ppp0 interface..."
