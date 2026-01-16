@@ -5,7 +5,7 @@ services:
     build: .
     container_name: l2tp-ipsec-vpn
     env_file:
-      - ../vpn.env
+      - ./vpn.env
     cap_add:
       - NET_ADMIN
       - NET_RAW

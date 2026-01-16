@@ -12,7 +12,7 @@ DockerコンテナでL2TP over IPSec VPNクライアントを実行します。
 
 ## 環境変数
 
-`../vpn.env` ファイルに以下の環境変数を設定してください：
+`./vpn.env` ファイルに以下の環境変数を設定してください：
 
 ```bash
 # VPNサーバーのIPアドレス（必須）
@@ -103,7 +103,7 @@ docker run -d \
   --cap-add=NET_RAW \
   --device=/dev/ppp \
   --privileged \
-  --env-file ../vpn.env \
+  --env-file ./vpn.env \
   -v /lib/modules:/lib/modules:ro \
   l2tp-ipsec-vpn
 
@@ -174,12 +174,6 @@ docker-compose exec vpn-client cat /var/log/xl2tpd.log
    ```
 
    `recv packet from ... size = 64` のような小さいパケットサイズが頻出する場合、MTUを下げてください。
-
-## セキュリティ上の注意
-
-- `vpn.env` ファイルには機密情報が含まれるため、適切に管理してください
-- ファイルのパーミッションを制限することを推奨します：`chmod 600 ../vpn.env`
-- Gitリポジトリにコミットする場合は `.gitignore` に追加してください
 
 ## 必要な権限
 
