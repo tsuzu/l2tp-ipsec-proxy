@@ -51,6 +51,22 @@ fi
 # BYPASS_CIDRS is optional (comma-separated list of CIDRs)
 # Example: BYPASS_CIDRS="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
 
+# Set debug log settings
+if [ -z "$DEBUG_LOGS" ]; then
+    DEBUG_LOGS="false"
+fi
+
+# Configure debug settings based on DEBUG_LOGS
+if [ "$DEBUG_LOGS" = "true" ]; then
+    CHARONDEBUG="all"
+    XL2TPD_DEBUG="yes"
+    PPP_DEBUG="debug"
+else
+    CHARONDEBUG=""
+    XL2TPD_DEBUG="no"
+    PPP_DEBUG="# debug disabled"
+fi
+
 echo "Configuring VPN connection..."
 echo "Server: $VPN_SERVER_IP"
 echo "Right ID: $RIGHTID"
@@ -61,6 +77,7 @@ echo "MRU: $MRU"
 # Generate ipsec.conf
 sed -e "s/VPN_SERVER_IP_PLACEHOLDER/$VPN_SERVER_IP/g" \
     -e "s/RIGHTID_PLACEHOLDER/$RIGHTID/g" \
+    -e "s/CHARONDEBUG_PLACEHOLDER/$CHARONDEBUG/g" \
     /etc/ipsec.conf.template > /etc/ipsec.conf
 
 # Generate ipsec.secrets
@@ -73,13 +90,16 @@ chmod 600 /etc/ipsec.secrets
 
 # Generate xl2tpd.conf
 sed -e "s/VPN_SERVER_IP_PLACEHOLDER/$VPN_SERVER_IP/g" \
+    -e "s/XL2TPD_DEBUG_PLACEHOLDER/$XL2TPD_DEBUG/g" \
     /etc/xl2tpd/xl2tpd.conf.template > /etc/xl2tpd/xl2tpd.conf
 
 # Generate PPP options
-sed -e "s/USER_PLACEHOLDER/$USER/g" \
+sed -e "s/VPN_SERVER_IP_PLACEHOLDER/$VPN_SERVER_IP/g" \
+    -e "s/USER_PLACEHOLDER/$USER/g" \
     -e "s/PASS_PLACEHOLDER/$PASS/g" \
     -e "s/MTU_PLACEHOLDER/$MTU/g" \
     -e "s/MRU_PLACEHOLDER/$MRU/g" \
+    -e "s/PPP_DEBUG_PLACEHOLDER/$PPP_DEBUG/g" \
     /etc/ppp/options.l2tpd.client.template > /etc/ppp/options.l2tpd.client
 
 # Create log file

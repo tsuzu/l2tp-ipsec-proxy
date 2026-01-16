@@ -1,15 +1,19 @@
 [global]
-access control = no
-debug avp = yes
-debug network = yes
-debug state = yes
-debug tunnel = yes
+access control = yes
+port = 0
+debug avp = XL2TPD_DEBUG_PLACEHOLDER
+debug network = XL2TPD_DEBUG_PLACEHOLDER
+debug state = XL2TPD_DEBUG_PLACEHOLDER
+debug tunnel = XL2TPD_DEBUG_PLACEHOLDER
 
 [lac vpn-connection]
 lns = VPN_SERVER_IP_PLACEHOLDER
-ppp debug = yes
+ppp debug = XL2TPD_DEBUG_PLACEHOLDER
 pppoptfile = /etc/ppp/options.l2tpd.client
 length bit = yes
 redial = yes
 redial timeout = 15
 max redials = 5
+tunnel rws = 8
+tx bps = 100000000
+rx bps = 100000000

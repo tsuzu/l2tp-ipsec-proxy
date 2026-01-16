@@ -1,5 +1,5 @@
 config setup
-    charondebug="all"
+    charondebug="CHARONDEBUG_PLACEHOLDER"
     uniqueids=yes
     strictcrlpolicy=no
 
@@ -7,12 +7,12 @@ conn L2TP-PSK
     type=transport
     authby=secret
     left=%defaultroute
-    leftprotoport=17/1701
+    leftprotoport=udp/%any
     right=VPN_SERVER_IP_PLACEHOLDER
     rightid=RIGHTID_PLACEHOLDER
-    rightprotoport=17/%any
+    rightprotoport=udp/l2tp
     auto=start
     keyexchange=ikev1
-    ike=aes128-sha1-modp2048,aes128-sha1-modp1024,3des-sha1-modp1024!
-    esp=aes128-sha1,3des-sha1!
+    ike=aes256-sha2_256-modp2048,aes256-sha2_256-modp1536,aes256-sha2_256-modp1024,aes256-sha1-modp2048,aes256-sha1-modp1536,aes256-sha1-modp1024,aes256-sha1-ecp384,aes128-sha1-modp1024,aes128-sha1-ecp256,3des-sha1-modp2048,3des-sha1-modp1024!
+    esp=aes256-sha1,aes128-sha1,3des-sha1!
     keyingtries=%forever
