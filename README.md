@@ -27,7 +27,7 @@ USER=your_username
 # L2TP パスワード（必須）
 PASS=your_password
 
-# IPSec の右側ID（オプション、デフォルトはVPN_SERVER_IP）
+# IPSec の右側ID（オプション、デフォルトは%any）
 RIGHTID=your.vpn.server.id
 
 # PPP MTU/MRU（オプション、デフォルトは1410）

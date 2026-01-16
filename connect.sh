@@ -25,8 +25,7 @@ fi
 
 # Set default RIGHTID if not specified
 if [ -z "$RIGHTID" ]; then
-    echo "Warning: RIGHTID is not set, using VPN_SERVER_IP as default"
-    RIGHTID=$VPN_SERVER_IP
+    RIGHTID="%any"
 fi
 
 # Set default MTU if not specified
