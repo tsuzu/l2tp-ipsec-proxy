@@ -189,7 +189,8 @@ docker-compose exec vpn-client cat /var/log/xl2tpd.log
 ```
 .
 ├── Dockerfile                      # コンテナイメージ定義
-├── docker-compose.yml              # Docker Compose設定
+├── compose.dev.yml                 # Docker Compose開発用設定
+├── compose.yml                     # Docker Compose設定
 ├── connect.sh                      # VPN接続スクリプト
 ├── ipsec.conf.template             # IPSec設定テンプレート
 ├── ipsec.secrets.template          # IPSec秘密鍵テンプレート
